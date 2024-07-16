@@ -4,9 +4,10 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { PrismaService } from './prisma.service';
 import { ValidationService } from './validation.service';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
 import { AuthMiddleware } from './auth.middleware';
+import { Throttle, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Global()
 @Module({
@@ -21,6 +22,10 @@ import { AuthMiddleware } from './auth.middleware';
         ConfigModule.forRoot({
             isGlobal: true
         }),
+        ThrottlerModule.forRoot([{
+            ttl: 60,
+            limit: 10,
+        }])
     ],
     providers: [
         PrismaService,
@@ -28,6 +33,10 @@ import { AuthMiddleware } from './auth.middleware';
         {
             provide: APP_FILTER,
             useClass: ErrorFilter
+        },
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard
         }
     ],
     exports: [

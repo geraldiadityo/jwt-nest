@@ -19,7 +19,7 @@ export class AuthMiddleware implements NestMiddleware {
         try {
             const decoded = jwt.verify(token, process.env.SECRET_KEY) as { username: string }
             // req.user = decoded.username;
-            // this.logger.info(req.user);
+            // this.logger.info(process.env.SECRET_KEY);
             const user = await this.prismaService.user.findUnique({
                 where: {
                     username: decoded.username as string

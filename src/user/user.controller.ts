@@ -1,9 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpException, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpException, Post, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { LoginUserRequest, RegisterUserRequest, UserResponse } from "src/model/user.model";
 import { WebResponse } from "../model/web.model";
 import { Auth } from "../common/auth.decorator";
 import { User } from "@prisma/client";
+import { JwtAuthGuard } from "../common/jwt-auth.guard";
+import { Throttle } from "@nestjs/throttler";
 
 @Controller('/api/users')
 export class UserController {
@@ -40,8 +42,9 @@ export class UserController {
             data: result
         }
     }
-
+    @Throttle({ default: {limit: 3, ttl: 5000} })
     @Get('/current')
+    // @UseGuards(JwtAuthGuard)
     @HttpCode(200)
     async get(
         @Auth() user: User
